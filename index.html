@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3º INFO · Embarque confirmado</title>
+<meta name="description" content="Cartão de embarque da turma 3º INFO 2026. Próxima parada: futuro.">
+<meta name="theme-color" content="#000000">
+<meta property="og:type" content="website">
+<meta property="og:title" content="3º INFO · Embarque confirmado">
+<meta property="og:description" content="Turma 2026. Próxima parada: futuro.">
+<meta property="og:url" content="https://info2026.mauriciovieira.dev.br/">
+<meta property="og:image" content="https://info2026.mauriciovieira.dev.br/previa-link.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="favicon.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --preto: #000; --painel: #05070d; --azul: #1e6eff; --ciano: #50c8ff; --gelo: #c8e1ff;
+    --cinza: #8a93a8; --linha: #1a2a48; --binario: #13305e;
+    --titulo: "Barlow Condensed", "DIN Condensed", "Arial Narrow", sans-serif;
+    --mono: "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--preto); color: #fff; -webkit-text-size-adjust: 100%; }
+  body { margin: 0; font-family: var(--mono); min-height: 100vh; overflow-x: hidden; }
+  #chuva { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; }
+  main { position: relative; z-index: 1; max-width: 880px; margin: 0 auto; padding: 0 16px 48px; }
+  .faixa { position: relative; z-index: 1; height: 10px; background: var(--azul); }
+
+  /* topo */
+  header { text-align: center; padding: 36px 0 8px; }
+  header img { width: min(340px, 78vw); height: auto; display: block; margin: 0 auto;
+    filter: drop-shadow(0 0 40px rgba(30,110,255,.55)); }
+  .rotulo { font-size: 13px; letter-spacing: .18em; color: var(--ciano); text-transform: uppercase; }
+  h1 { font-family: var(--titulo); font-weight: 700; line-height: .9; margin: 14px 0 10px;
+    font-size: clamp(56px, 16vw, 120px); letter-spacing: .01em; }
+  h1 span { color: var(--ciano); display: block; }
+  .sub { color: var(--gelo); font-size: 15px; }
+
+  /* cartão de embarque */
+  .cartao { margin: 36px 0; display: grid; grid-template-columns: 1fr; background: rgba(5,7,13,.92);
+    border: 1px solid var(--linha); border-top: 6px solid var(--azul); border-radius: 18px; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6), 0 0 0 1px rgba(80,200,255,.05); }
+  .principal { padding: 22px 22px 18px; }
+  .linha-topo { display: flex; justify-content: space-between; gap: 12px; font-size: 12px;
+    letter-spacing: .12em; color: var(--ciano); text-transform: uppercase; }
+  .rota { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; margin: 14px 0 4px; }
+  .sigla { font-family: var(--titulo); font-weight: 700; font-size: clamp(64px, 19vw, 112px); line-height: .85; }
+  .cidade { font-size: 12px; color: var(--cinza); letter-spacing: .14em; margin-top: 4px; }
+  .rota .fim { text-align: right; }
+  .trajeto { display: flex; align-items: center; gap: 6px; min-width: 0; overflow: hidden; color: var(--azul);
+    font-size: 14px; font-weight: 700; white-space: nowrap; }
+  .trajeto .bits { overflow: hidden; text-overflow: clip; flex: 1; letter-spacing: .1em; }
+  .trajeto .bits b { color: var(--ciano); font-weight: 700; }
+  .trajeto svg { flex: none; width: 30px; height: 30px; fill: var(--ciano); }
+  .campos { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px 18px; margin-top: 20px; }
+  .campo small { display: block; font-size: 11px; color: var(--cinza); letter-spacing: .14em; text-transform: uppercase; }
+  .campo strong { font-family: var(--titulo); font-weight: 600; font-size: 28px; letter-spacing: .02em; }
+  .picote { position: relative; height: 0; border-top: 2px dashed #2a3654; margin: 0 18px; }
+  .picote::before, .picote::after { content: ""; position: absolute; top: -13px; width: 24px; height: 24px;
+    border-radius: 50%; background: var(--preto); }
+  .picote::before { left: -31px; } .picote::after { right: -31px; }
+  .canhoto { padding: 18px 22px 22px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .canhoto .ok { font-family: var(--titulo); font-weight: 700; font-size: 30px; line-height: 1; }
+  .canhoto .ok span { color: var(--ciano); }
+  .barras { height: 54px; flex: 0 1 180px; background:
+    repeating-linear-gradient(90deg, #fff 0 3px, transparent 3px 6px, #fff 6px 7px, transparent 7px 11px, #fff 11px 15px, transparent 15px 17px); opacity: .9; }
+
+  /* seções */
+  section { margin: 44px 0; }
+  h2 { font-family: var(--titulo); font-weight: 700; font-size: 38px; margin: 0 0 4px; letter-spacing: .02em; }
+  h2 + p { margin: 0 0 18px; color: var(--cinza); font-size: 13px; }
+  .bagagem { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+  .item { display: flex; flex-direction: column; gap: 10px; padding: 18px; min-height: 132px; border-radius: 14px;
+    background: rgba(5,7,13,.92); border: 1px solid var(--linha); color: #fff; text-decoration: none;
+    transition: border-color .2s, transform .2s; }
+  a.item:hover, a.item:focus-visible { border-color: var(--ciano); transform: translateY(-2px); outline: none; }
+  .item svg { width: 30px; height: 30px; stroke: var(--ciano); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .item strong { font-family: var(--titulo); font-weight: 600; font-size: 26px; line-height: 1; }
+  .item small { margin-top: auto; font-size: 11px; letter-spacing: .14em; color: var(--ciano); text-transform: uppercase; }
+  .item.breve { opacity: .55; }
+  .item.breve small { color: var(--cinza); }
+  .passageiros { list-style: none; margin: 0; padding: 18px; display: grid; grid-template-columns: repeat(2, 1fr);
+    gap: 10px 16px; background: rgba(5,7,13,.92); border: 1px solid var(--linha); border-radius: 14px; }
+  .passageiros li { font-size: 14px; font-weight: 700; display: flex; gap: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .passageiros li span { color: var(--azul); }
+  footer { text-align: center; color: var(--cinza); font-size: 12px; letter-spacing: .12em; padding: 8px 0 28px; }
+  footer b { color: var(--ciano); font-weight: 700; }
+
+  @media (min-width: 720px) {
+    .cartao { grid-template-columns: 1fr 230px; }
+    .picote { height: auto; border-top: 0; border-left: 2px dashed #2a3654; margin: 18px 0; }
+    .picote::before { top: -31px; left: -13px; } .picote::after { top: auto; bottom: -31px; left: -13px; right: auto; }
+    .canhoto { flex-direction: column; justify-content: center; text-align: center; }
+    .barras { flex: none; width: 160px; height: 70px; }
+    .campos { grid-template-columns: repeat(4, 1fr); }
+    .bagagem { grid-template-columns: repeat(4, 1fr); }
+    .passageiros { grid-template-columns: repeat(4, 1fr); padding: 22px; }
+    header { padding-top: 56px; }
+  }
+</style>
+</head>
+<body>
+<canvas id="chuva" aria-hidden="true"></canvas>
+<div class="faixa"></div>
+<main>
+  <header>
+    <img src="logo.webp" alt="Logo da turma 3º INFO: o número 3 grafitado e um dinossauro pixelado com fogo azul" width="898" height="834">
+    <div class="rotulo">Cartão de embarque · 3º INFO Airlines</div>
+    <h1>Embarque <span>confirmado</span></h1>
+    <div class="sub">Turma 2026 · Técnico em Informática</div>
+  </header>
+
+  <article class="cartao" aria-label="Cartão de embarque">
+    <div class="principal">
+      <div class="linha-topo"><span>Cartão de embarque</span><span>3º INFO Airlines</span></div>
+      <div class="rota">
+        <div><div class="sigla">ESC</div><div class="cidade">ESCOLA</div></div>
+        <div class="trajeto" aria-hidden="true"><span class="bits" id="bits"></span>
+          <svg viewBox="0 0 24 24"><path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 0 0-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5z" transform="rotate(90 12 12)"/></svg></div>
+        <div class="fim"><div class="sigla">FUT</div><div class="cidade">FUTURO</div></div>
+      </div>
+      <div class="campos">
+        <div class="campo"><small>Voo</small><strong>2026</strong></div>
+        <div class="campo"><small>Portão</small><strong>Formatura</strong></div>
+        <div class="campo"><small>Assento</small><strong>Todos</strong></div>
+        <div class="campo"><small>Classe</small><strong>Primeira</strong></div>
+      </div>
+    </div>
+    <div class="picote"></div>
+    <div class="canhoto">
+      <div class="ok">Embarque<br><span>confirmado ✓</span></div>
+      <div class="barras" aria-hidden="true"></div>
+    </div>
+  </article>
+
+  <section aria-labelledby="t-bagagem">
+    <h2 id="t-bagagem">Bagagem de mão</h2>
+    <p>O que a turma leva desses três anos.</p>
+    <div class="bagagem" id="bagagem"></div>
+  </section>
+
+  <section aria-labelledby="t-lista">
+    <h2 id="t-lista">Lista de passageiros</h2>
+    <p id="t-total"></p>
+    <ol class="passageiros" id="passageiros"></ol>
+  </section>
+</main>
+<footer>VOO 2026 · PRÓXIMA PARADA: <b>FUTURO</b></footer>
+<div class="faixa"></div>
+
+<script>
+/* ===================== EDITE AQUI ===================== */
+// Cole o link entre as aspas. Enquanto estiver vazio, o item aparece como "Em breve".
+const LINKS = {
+  fotos:    "",   // ex.: pasta do Google Drive ou Google Fotos
+  video:    "",   // ex.: vídeo no YouTube
+  playlist: "",   // ex.: playlist no Spotify
+  recados:  "",   // ex.: mural no Padlet, formulário ou grupo
+  instagram:"",   // perfil da turma
+};
+const NOMES = ["ANA", "BRUNO", "CARLA", "DANIEL", "EDUARDA", "FELIPE", "GABRIEL", "HELENA", "IGOR", "JULIA",
+               "KAUA", "LARISSA", "MATHEUS", "NICOLE", "OTAVIO", "PEDRO", "RAFAELA", "SAMUEL", "THAIS", "VITOR"];
+/* ====================================================== */
+
+const ICONES = {
+  fotos: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="14" rx="2"/><circle cx="12" cy="13" r="3.5"/><path d="M8 6l1.5-2h5L16 6"/></svg>',
+  video: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3z"/></svg>',
+  playlist: '<svg viewBox="0 0 24 24"><path d="M9 18V6l11-2v12"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg>',
+  recados: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
+  instagram: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6"/></svg>',
+};
+const ITENS = [["fotos", "Fotos"], ["video", "Vídeo"], ["playlist", "Playlist"], ["recados", "Recados"], ["instagram", "Instagram"]];
+
+const bag = document.getElementById("bagagem");
+for (const [chave, nome] of ITENS) {
+  const url = (LINKS[chave] || "").trim();
+  if (!url && chave === "instagram") continue;               // instagram só aparece se tiver link
+  const el = document.createElement(url ? "a" : "div");
+  el.className = "item" + (url ? "" : " breve");
+  if (url) { el.href = url; el.target = "_blank"; el.rel = "noopener"; }
+  el.innerHTML = ICONES[chave] + "<strong>" + nome + "</strong><small>" + (url ? "Abrir ↗" : "Em breve ✈") + "</small>";
+  bag.appendChild(el);
+}
+
+const lista = document.getElementById("passageiros");
+NOMES.forEach((n, i) => {
+  const li = document.createElement("li");
+  li.innerHTML = "<span>" + String(i + 1).padStart(2, "0") + "</span>";
+  li.appendChild(document.createTextNode(n));
+  lista.appendChild(li);
+});
+document.getElementById("t-total").textContent = NOMES.length + " passageiros a bordo.";
+
+const bits = document.getElementById("bits");
+let s = ""; for (let i = 0; i < 40; i++) s += Math.random() < .5 ? "0" : "<b>1</b>";
+bits.innerHTML = s;
+
+/* chuva binária ao fundo (parada para quem prefere menos movimento) */
+const cv = document.getElementById("chuva"), ctx = cv.getContext("2d");
+const parado = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+let cols = [], tam = 16, larg = 0, alt = 0;
+function medir() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  larg = window.innerWidth; alt = window.innerHeight;
+  cv.width = larg * dpr; cv.height = alt * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  tam = larg < 600 ? 14 : 16;
+  cols = Array.from({ length: Math.ceil(larg / tam) }, () => Math.random() * alt / tam);
+  ctx.fillStyle = "#000"; ctx.fillRect(0, 0, larg, alt);
+  if (parado) estatico();
+}
+function estatico() {
+  ctx.font = "700 " + tam + "px JetBrains Mono, Menlo, monospace"; ctx.fillStyle = "#0f264c";
+  for (let y = tam; y < alt; y += tam * 1.25)
+    for (let x = 0; x < larg; x += tam * .62) ctx.fillText(Math.random() < .5 ? "0" : "1", x, y);
+}
+let ultimo = 0;
+function quadro(t) {
+  requestAnimationFrame(quadro);
+  if (t - ultimo < 70) return; ultimo = t;
+  ctx.fillStyle = "rgba(0,0,0,.12)"; ctx.fillRect(0, 0, larg, alt);
+  ctx.font = "700 " + tam + "px JetBrains Mono, Menlo, monospace";
+  cols.forEach((y, i) => {
+    ctx.fillStyle = Math.random() < .04 ? "#3a7fe0" : "#13305e";
+    ctx.fillText(Math.random() < .5 ? "0" : "1", i * tam, y * tam);
+    cols[i] = (y * tam > alt && Math.random() > .975) ? 0 : y + 1;
+  });
+}
+window.addEventListener("resize", medir);
+medir();
+if (!parado) requestAnimationFrame(quadro);
+</script>
+</body>
+</html>
