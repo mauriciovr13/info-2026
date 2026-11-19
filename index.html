@@ -84,10 +84,48 @@
   .item small { margin-top: auto; font-size: 11px; letter-spacing: .14em; color: var(--ciano); text-transform: uppercase; }
   .item.breve { opacity: .55; }
   .item.breve small { color: var(--cinza); }
+  /* galeria de fotos enviadas pela turma */
+  .galeria-topo { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 22px 0 12px; }
+  .galeria-topo h3 { font-family: var(--titulo); font-weight: 700; font-size: 26px; margin: 0; letter-spacing: .02em; }
+  .botao { display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 999px;
+    background: var(--azul); color: #fff; font: 700 12px var(--mono); letter-spacing: .12em; text-transform: uppercase;
+    text-decoration: none; border: 0; cursor: pointer; white-space: nowrap; }
+  .botao:hover, .botao:focus-visible { background: var(--ciano); color: #000; outline: none; }
+  .botao.breve { background: transparent; border: 1px solid var(--linha); color: var(--cinza); cursor: default; }
+  .fotos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .fotos button { padding: 0; border: 1px solid var(--linha); border-radius: 12px; overflow: hidden; cursor: zoom-in;
+    background: var(--painel); aspect-ratio: 1; }
+  .fotos button:focus-visible { outline: 2px solid var(--ciano); outline-offset: 2px; }
+  .fotos img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s; }
+  .fotos button:hover img { transform: scale(1.04); }
+  .fotos button { position: relative; }
+  .fotos .play { position: absolute; inset: 0; margin: auto; width: 44px; height: 44px; border-radius: 50%;
+    background: rgba(0,0,0,.65); border: 2px solid #fff; display: grid; place-items: center; pointer-events: none; }
+  .fotos .play::before { content: ""; margin-left: 4px; border-left: 14px solid #fff; border-top: 9px solid transparent; border-bottom: 9px solid transparent; }
+  .recados { columns: 1; column-gap: 12px; }
+  .recado { break-inside: avoid; margin: 0 0 12px; padding: 18px 18px 14px; border-radius: 14px; background: rgba(5,7,13,.92);
+    border: 1px solid var(--linha); border-left: 4px solid var(--azul); }
+  .recado p { margin: 0; font-size: 14px; line-height: 1.55; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .recado small { display: block; margin-top: 10px; font-size: 11px; color: var(--ciano); letter-spacing: .14em; text-transform: uppercase; }
+  .aviso { padding: 26px 18px; text-align: center; color: var(--cinza); font-size: 13px; border: 1px dashed var(--linha);
+    border-radius: 14px; background: rgba(5,7,13,.8); }
+  .mais { display: block; margin: 14px auto 0; }
+  dialog.zoom { padding: 0; border: 0; background: transparent; max-width: 100vw; max-height: 100vh; width: 100vw; height: 100vh; }
+  dialog.zoom::backdrop { background: rgba(0,0,0,.92); }
+  dialog.zoom img, dialog.zoom iframe { position: absolute; inset: 0; margin: auto; max-width: calc(100vw - 32px); max-height: calc(100vh - 120px);
+    border-radius: 10px; box-shadow: 0 20px 60px rgba(0,0,0,.8); }
+  dialog.zoom iframe { border: 0; width: min(calc(100vw - 32px), calc((100vh - 120px) * 16 / 9)); aspect-ratio: 16 / 9; height: auto; background: #000; }
+  dialog.zoom button { position: absolute; width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--linha);
+    background: rgba(5,7,13,.9); color: #fff; font-size: 22px; cursor: pointer; }
+  dialog.zoom button:hover, dialog.zoom button:focus-visible { border-color: var(--ciano); outline: none; }
+  .z-fechar { top: 16px; right: 16px; } .z-ant { left: 16px; top: calc(50% - 24px); } .z-prox { right: 16px; top: calc(50% - 24px); }
+  .z-conta { position: absolute; bottom: 22px; left: 0; right: 0; text-align: center; color: var(--cinza); font-size: 12px; letter-spacing: .14em; }
+  @media (max-width: 719px) { .z-ant, .z-prox { top: auto; bottom: 12px; } }
+
   .passageiros { list-style: none; margin: 0; padding: 18px; display: grid; grid-template-columns: repeat(2, 1fr);
     gap: 10px 16px; background: rgba(5,7,13,.92); border: 1px solid var(--linha); border-radius: 14px; }
-  .passageiros li { font-size: 14px; font-weight: 700; display: flex; gap: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .passageiros li span { color: var(--azul); }
+  .passageiros li { font-size: 14px; font-weight: 700; display: flex; gap: 10px; line-height: 1.3; }
+  .passageiros li span { color: var(--azul); flex: none; }
   footer { text-align: center; color: var(--cinza); font-size: 12px; letter-spacing: .12em; padding: 8px 0 28px; }
   footer b { color: var(--ciano); font-weight: 700; }
 
@@ -99,7 +137,9 @@
     .barras { flex: none; width: 160px; height: 70px; }
     .campos { grid-template-columns: repeat(4, 1fr); }
     .bagagem { grid-template-columns: repeat(4, 1fr); }
-    .passageiros { grid-template-columns: repeat(4, 1fr); padding: 22px; }
+    .fotos { grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .recados { columns: 2; }
+    .passageiros { grid-template-columns: repeat(3, 1fr); padding: 22px; }
     header { padding-top: 56px; }
   }
 </style>
@@ -142,7 +182,24 @@
     <h2 id="t-bagagem">Bagagem de mão</h2>
     <p>O que a turma leva desses três anos.</p>
     <div class="bagagem" id="bagagem"></div>
+    <div class="galeria-topo">
+      <h3>Fotos e vídeos da turma</h3>
+      <span id="enviar"></span>
+    </div>
+    <div id="galeria"><div class="aviso">Carregando fotos…</div></div>
+    <div id="bloco-recados" hidden>
+      <div class="galeria-topo"><h3>Recados</h3></div>
+      <div id="recados"></div>
+    </div>
   </section>
+  <dialog class="zoom" id="zoom" aria-label="Foto ampliada">
+    <img id="z-img" alt="">
+    <iframe id="z-video" title="Vídeo da turma" allow="autoplay; fullscreen" allowfullscreen hidden></iframe>
+    <button class="z-fechar" id="z-fechar" aria-label="Fechar">✕</button>
+    <button class="z-ant" id="z-ant" aria-label="Foto anterior">‹</button>
+    <button class="z-prox" id="z-prox" aria-label="Próxima foto">›</button>
+    <div class="z-conta" id="z-conta"></div>
+  </dialog>
 
   <section aria-labelledby="t-lista">
     <h2 id="t-lista">Lista de passageiros</h2>
@@ -157,17 +214,18 @@
 /* ===================== EDITE AQUI ===================== */
 // Cole o link entre as aspas. Enquanto estiver vazio, o item aparece como "Em breve".
 const LINKS = {
-  fotos:    "",   // ex.: pasta do Google Drive ou Google Fotos
-  video:    "",   // ex.: vídeo no YouTube
+  video:    "",   // ex.: o vídeo oficial da turma no YouTube (vazio = "Em breve")
   playlist: "",   // ex.: playlist no Spotify
-  recados:  "",   // ex.: mural no Padlet, formulário ou grupo
   instagram:"",   // perfil da turma
 };
-const NOMES = ["AFONSO GUERRA", "ANDRESSA SANTOS", "ANNA FLÁVIA DEMETRIO", "ANNA IZABELL FERNANDES", "BENJAMIN SANTOS", "CLARICE SOUZA",
-               "CLEYTON OLIVEIRA", "DANIELLE SILVA", "DAVI DIAS", "GUILHERME SILVA", "KAYQUE LAGE", "LAÍS PEREIRA",
-               "LAURA SILVA", "LOURENÇO SILVA", "LUIZ SILVA", "MARIA FERNANDA MAGALHÃES", "MARIANNY FERREIRA", "NAYARA TEIXEIRA",
+// Fotos, vídeos e recados enviados pela turma (passo a passo em PASSO-A-PASSO-FOTOS.md)
+const ENVIAR_FOTO = "";   // deixe vazio para não ter botão de envio (as fotos são surpresa)
+const FOTOS_API   = "";   // link do App da Web do Google Apps Script (termina em /exec)
+const NOMES = ["AFONSO GUERRA", "ANDRESSA SANTOS", "ANNA FLÁVIA DEMÉTRIO", "ANNA IZABELL FERNANDES", "BENJAMIN SANTOS", "CLARICE SOUZA",
+               "CLEYTON OLIVEIRA", "DANIELLE SILVA", "DAVI DIAS", "GUILHERME SILVA", "KAYQUE LAGE", "LAURA SILVA",
+               "LAÍS PEREIRA", "LOURENÇO SILVA", "LUIZ SILVA", "MARIA FERNANDA MAGALHÃES", "MARIANNY FERREIRA", "NAYARA TEIXEIRA",
                "PRISCILLA SEARA", "SAMUEL SILVA", "SARA CRUZ", "TAIS PACHECO", "TAMYRES LEÃO", "THIAGO LAGE",
-               "TÚLIO SILVA", "VITÓRIA SÁ"];
+               "TULHYO DA COSTA SILVA", "TÚLIO SILVA", "VITÓRIA SÁ"];
 /* ====================================================== */
 
 const ICONES = {
@@ -177,7 +235,7 @@ const ICONES = {
   recados: '<svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 9h8M8 12h5"/></svg>',
   instagram: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".6"/></svg>',
 };
-const ITENS = [["fotos", "Fotos"], ["video", "Vídeo"], ["playlist", "Playlist"], ["recados", "Recados"], ["instagram", "Instagram"]];
+const ITENS = [["video", "Vídeo"], ["playlist", "Playlist"], ["instagram", "Instagram"]];   // fotos e recados aparecem logo abaixo
 
 const bag = document.getElementById("bagagem");
 for (const [chave, nome] of ITENS) {
@@ -189,6 +247,81 @@ for (const [chave, nome] of ITENS) {
   el.innerHTML = ICONES[chave] + "<strong>" + nome + "</strong><small>" + (url ? "Abrir ↗" : "Em breve ✈") + "</small>";
   bag.appendChild(el);
 }
+
+/* galeria: fotos, vídeos e recados aprovados no Google Drive */
+const enviar = document.getElementById("enviar");
+if (ENVIAR_FOTO.trim()) {                                     // sem link, o botão de envio nem aparece
+  enviar.innerHTML = '<a class="botao" target="_blank" rel="noopener">Enviar foto ↗</a>';
+  enviar.firstChild.href = ENVIAR_FOTO.trim();
+}
+const galeria = document.getElementById("galeria");
+const zoom = document.getElementById("zoom"), zImg = document.getElementById("z-img"),
+      zVideo = document.getElementById("z-video"), zConta = document.getElementById("z-conta");
+const POR_VEZ = 12;
+let midias = [], mostradas = 0, atual = 0;
+const miniatura = (id, w) => "https://drive.google.com/thumbnail?id=" + encodeURIComponent(id) + "&sz=w" + w;
+const player = id => "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/preview";
+function aviso(txt) { galeria.innerHTML = '<div class="aviso"></div>'; galeria.firstChild.textContent = txt; }
+function mostrarMais() {
+  let grade = galeria.querySelector(".fotos");
+  if (!grade) { galeria.innerHTML = ""; grade = document.createElement("div"); grade.className = "fotos"; galeria.appendChild(grade); }
+  midias.slice(mostradas, mostradas + POR_VEZ).forEach((m, k) => {
+    const i = mostradas + k, b = document.createElement("button"), img = document.createElement("img");
+    const nome = (m.tipo === "video" ? "Vídeo " : "Foto ") + (i + 1);
+    b.type = "button"; b.setAttribute("aria-label", (m.tipo === "video" ? "Assistir " : "Ampliar ") + nome);
+    img.src = miniatura(m.id, 500); img.alt = nome + " da turma"; img.loading = "lazy"; img.referrerPolicy = "no-referrer";
+    img.onerror = () => { if (m.tipo === "video") img.remove(); else b.remove(); };   // vídeo sem miniatura ainda: fica só o ▶
+    b.appendChild(img);
+    if (m.tipo === "video") { const s = document.createElement("span"); s.className = "play"; b.appendChild(s); }
+    b.onclick = () => abrir(i); grade.appendChild(b);
+  });
+  mostradas = Math.min(midias.length, mostradas + POR_VEZ);
+  galeria.querySelector(".mais")?.remove();
+  if (mostradas < midias.length) {
+    const m = document.createElement("button"); m.type = "button"; m.className = "botao mais";
+    m.textContent = "Ver mais (" + (midias.length - mostradas) + ")"; m.onclick = mostrarMais; galeria.appendChild(m);
+  }
+}
+function abrir(i) {
+  atual = (i + midias.length) % midias.length;
+  const m = midias[atual], video = m.tipo === "video";
+  zImg.hidden = video; zVideo.hidden = !video;
+  if (video) { zImg.removeAttribute("src"); zVideo.src = player(m.id); }
+  else { zVideo.removeAttribute("src"); zImg.src = miniatura(m.id, 1600); zImg.alt = "Foto " + (atual + 1) + " da turma"; }
+  zConta.textContent = (atual + 1) + " / " + midias.length;
+  if (!zoom.open) zoom.showModal();
+}
+zoom.addEventListener("close", () => zVideo.removeAttribute("src"));   // para o vídeo ao fechar
+document.getElementById("z-fechar").onclick = () => zoom.close();
+document.getElementById("z-ant").onclick = () => abrir(atual - 1);
+document.getElementById("z-prox").onclick = () => abrir(atual + 1);
+zoom.addEventListener("click", e => { if (e.target === zoom) zoom.close(); });
+zoom.addEventListener("keydown", e => { if (e.key === "ArrowLeft") abrir(atual - 1); if (e.key === "ArrowRight") abrir(atual + 1); });
+let toque = null;
+zoom.addEventListener("touchstart", e => { toque = e.touches[0].clientX; }, { passive: true });
+zoom.addEventListener("touchend", e => {
+  if (toque === null) return; const dx = e.changedTouches[0].clientX - toque; toque = null;
+  if (Math.abs(dx) > 50) abrir(atual + (dx < 0 ? 1 : -1));
+});
+function mostrarRecados(lista) {
+  const caixa = document.getElementById("recados");
+  lista.forEach(r => {
+    const c = document.createElement("article"), p = document.createElement("p");
+    c.className = "recado"; p.textContent = r.texto; c.appendChild(p);
+    if (r.nome) { const s = document.createElement("small"); s.textContent = "— " + r.nome; c.appendChild(s); }
+    caixa.appendChild(c);
+  });
+  document.getElementById("bloco-recados").hidden = !lista.length;
+}
+if (!FOTOS_API.trim()) aviso("A galeria abre em breve. As fotos e vídeos da turma vão aparecer aqui. 📸");
+else fetch(FOTOS_API.trim())
+  .then(r => r.json())
+  .then(d => {
+    midias = (d.fotos || []).filter(m => m && m.id);
+    if (!midias.length) aviso("As fotos e vídeos da turma vão aparecer aqui. 📸"); else mostrarMais();
+    mostrarRecados((d.recados || []).filter(r => r && r.texto));
+  })
+  .catch(() => aviso("Não foi possível carregar as fotos agora. Tente de novo mais tarde."));
 
 const lista = document.getElementById("passageiros");
 NOMES.forEach((n, i) => {
