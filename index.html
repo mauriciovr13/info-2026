@@ -105,6 +105,10 @@
   .slide { flex: 0 0 100%; scroll-snap-align: center; position: relative; aspect-ratio: 4 / 3; max-height: 70vh;
     background: #000; border-radius: 12px; overflow: hidden; border: 0; padding: 0; display: block; }
   .slide.video { aspect-ratio: 16 / 9; }
+  .slide.spotify { aspect-ratio: auto; height: 452px; max-height: none; background: transparent; }
+  .slide.spotify iframe { border-radius: 12px; }
+  .painel.unico .seta { display: none; }
+  .painel.unico .miniaturas { justify-content: center; }
   .slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .slide.video img { object-fit: cover; }
   .slide iframe, .slide video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
@@ -246,7 +250,7 @@
 /* ===================== EDITE AQUI ===================== */
 // Cole o link entre as aspas. Enquanto estiver vazio, o item aparece como "Em breve".
 const LINKS = {
-  playlist: "",   // ex.: playlist no Spotify
+  playlist: "https://open.spotify.com/playlist/4EBOS2O6HnpBoXCn6sQE18",   // link da playlist do Spotify (ex.: https://open.spotify.com/playlist/...): toca dentro do site
   instagram:"",   // perfil da turma
 };
 // Fotos, vídeos e recados: pasta do Google Drive compartilhada por link (passo a passo em PASSO-A-PASSO-FOTOS.md)
@@ -302,9 +306,18 @@ for (const [chave, nome, unidade] of [["fotos", "Fotos", ["foto", "fotos"]], ["v
   CARTOES[chave] = { el: b, nome, unidade };
   bag.appendChild(b);
 }
+const spotifyId = u => (String(u).match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?playlist\/([A-Za-z0-9]+)/) || [])[1] || "";
 for (const [chave, nome] of LINKS_EXTRAS) {
   const url = (LINKS[chave] || "").trim();
   if (!url && chave === "instagram") continue;
+  if (chave === "playlist" && spotifyId(url)) {                    // playlist do Spotify: abre o player no painel
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "item"; b.setAttribute("aria-controls", "painel"); b.setAttribute("aria-expanded", "false");
+    b.innerHTML = ICONES.playlist + "<strong>" + nome + "</strong><small>Ouvir ›</small>";
+    b.onclick = () => alternar("playlist");
+    CARTOES.playlist = { el: b, nome, fixo: true };
+    bag.appendChild(b); continue;
+  }
   const el = document.createElement(url ? "a" : "div");
   el.className = "item" + (url ? "" : " breve");
   if (url) { el.href = url; el.target = "_blank"; el.rel = "noopener"; }
@@ -313,7 +326,8 @@ for (const [chave, nome] of LINKS_EXTRAS) {
 }
 function atualizarCartoes() {
   for (const chave in CARTOES) {
-    const c = CARTOES[chave], n = ACERVO[chave].length;
+    const c = CARTOES[chave]; if (c.fixo) continue;
+    const n = ACERVO[chave].length;
     c.el.disabled = !n; c.el.classList.toggle("breve", !n);
     c.el.querySelector(".num").textContent = n || "–";
     c.el.querySelector("small").textContent = n ? (chave === "fotos" ? "Ver todas ›" : "Ver todos ›") : "Em breve ✈";
@@ -338,6 +352,19 @@ function fechar() {
 }
 function montar(chave) {
   pararVideo(); trilho.innerHTML = ""; minis.innerHTML = "";
+  painel.classList.toggle("unico", chave === "playlist");
+  if (chave === "playlist") {
+    pTitulo.textContent = "Playlist da turma";
+    const s = document.createElement("div"); s.className = "slide spotify";
+    const f = document.createElement("iframe"); f.title = "Playlist da turma no Spotify"; f.loading = "lazy";
+    f.src = "https://open.spotify.com/embed/playlist/" + encodeURIComponent(spotifyId(LINKS.playlist)) + "?utm_source=generator&theme=0";
+    f.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+    s.appendChild(f); trilho.appendChild(s);
+    const a = document.createElement("a"); a.className = "botao"; a.href = LINKS.playlist.trim(); a.target = "_blank"; a.rel = "noopener";
+    a.textContent = "Abrir no Spotify ↗"; minis.appendChild(a);
+    trilho.scrollTo({ left: 0, behavior: "instant" }); pConta.textContent = ""; trilho.style.height = "";
+    return;
+  }
   const itens = ACERVO[chave], video = chave === "videos";
   pTitulo.textContent = { fotos: "Fotos da turma", videos: "Vídeos da turma", recados: "Recados da turma" }[chave];
   itens.forEach((m, i) => {
