@@ -99,7 +99,7 @@
     color: #fff; font-size: 20px; line-height: 1; cursor: pointer; display: grid; place-items: center; }
   .redondo:hover, .redondo:focus-visible { border-color: var(--ciano); outline: none; }
   .carrossel { position: relative; }
-  .trilho { display: flex; align-items: flex-start; gap: 10px; overflow-x: auto; overflow-y: hidden; transition: height .25s; scroll-snap-type: x mandatory;
+  .trilho { display: flex; align-items: flex-start; gap: 10px; overflow-x: auto; overflow-y: hidden;  scroll-snap-type: x mandatory;
     scrollbar-width: none; overscroll-behavior-x: contain; border-radius: 12px; }
   .trilho::-webkit-scrollbar { display: none; }
   .slide { flex: 0 0 100%; scroll-snap-align: center; position: relative; aspect-ratio: 4 / 3; max-height: 70vh;
@@ -107,7 +107,8 @@
   .slide.video { aspect-ratio: 16 / 9; }
   .slide img { width: 100%; height: 100%; object-fit: contain; display: block; }
   .slide.video img { object-fit: cover; }
-  .slide iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .slide iframe, .slide video { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
+  .rec-video video, .rec-video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #000; }
   button.slide { cursor: zoom-in; }
   .slide.video button { position: absolute; inset: 0; width: 100%; border: 0; background: transparent; cursor: pointer; }
   .play { position: absolute; inset: 0; margin: auto; width: 64px; height: 64px; border-radius: 50%; pointer-events: none;
@@ -126,7 +127,12 @@
   .slide.texto::before { content: "“"; font-family: var(--titulo); font-size: 90px; line-height: .5; color: var(--azul); margin-bottom: 10px; }
   .slide.texto p { margin: 0; font-size: clamp(15px, 2.2vw, 19px); line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
   .slide.texto small { display: block; margin-top: 18px; font-size: 12px; color: var(--ciano); letter-spacing: .16em; text-transform: uppercase; }
-  .miniaturas .num-rec { width: 40px; height: 40px; font: 700 13px var(--mono); color: #fff; }
+  .slide.texto.com-video::before { display: none; }
+  .rec-video { position: relative; flex: none; width: 100%; max-width: 640px; margin: 0 auto 16px; aspect-ratio: 16 / 9;
+    border-radius: 10px; overflow: hidden; background: #000; }
+  .rec-video img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .rec-video button { position: absolute; inset: 0; width: 100%; border: 0; background: transparent; cursor: pointer; }
+  .miniaturas .num-rec { width: auto; min-width: 40px; height: 40px; padding: 0 8px; font: 700 13px var(--mono); color: #fff; }
   .recados { columns: 1; column-gap: 12px; }
   .recado { break-inside: avoid; margin: 0 0 12px; padding: 18px 18px 14px; border-radius: 14px; background: rgba(5,7,13,.92);
     border: 1px solid var(--linha); border-left: 4px solid var(--azul); }
@@ -243,8 +249,10 @@ const LINKS = {
   playlist: "",   // ex.: playlist no Spotify
   instagram:"",   // perfil da turma
 };
-// Fotos, vídeos e recados enviados pela turma (passo a passo em PASSO-A-PASSO-FOTOS.md)
-const FOTOS_API   = "";   // link do App da Web do Google Apps Script (termina em /exec)
+// Fotos, vídeos e recados: pasta do Google Drive compartilhada por link (passo a passo em PASSO-A-PASSO-FOTOS.md)
+const DRIVE_PASTA = "1ua1xfSShBPT-nccKW_qpTU9RdlYqKa7N";   // ID da pasta "3º INFO - Site" (tem dentro: fotos, videos, recados)
+const DRIVE_CHAVE = "AIzaSyCimu_IDlG69DuyJMPXe3R90M3hMUy5Exk";   // chave de API do Google (só lê o que está público por link)
+const GALERIA = "galeria.json";   // reserva: usado só se as duas linhas acima estiverem vazias
 const NOMES = ["AFONSO GUERRA", "ANDRESSA SANTOS", "ANNA FLÁVIA DEMÉTRIO", "ANNA IZABELL FERNANDES", "BENJAMIN SANTOS", "CLARICE SOUZA",
                "CLEYTON OLIVEIRA", "DANIELLE SILVA", "DAVI DIAS", "GUILHERME SILVA", "KAYQUE LAGE", "LAURA SILVA",
                "LAÍS PEREIRA", "LOURENÇO SILVA", "LUIZ SILVA", "MARIA FERNANDA MAGALHÃES", "MARIANNY FERREIRA", "NAYARA TEIXEIRA",
@@ -265,8 +273,25 @@ const LINKS_EXTRAS = [["playlist", "Playlist"], ["instagram", "Instagram"]];   /
 const bag = document.getElementById("bagagem");
 const painel = document.getElementById("painel"), trilho = document.getElementById("trilho"),
       minis = document.getElementById("miniaturas"), pTitulo = document.getElementById("p-titulo"), pConta = document.getElementById("p-conta");
-const miniatura = (id, w) => "https://drive.google.com/thumbnail?id=" + encodeURIComponent(id) + "&sz=w" + w;
-const player = id => "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/preview";
+const yt = v => (v && v.youtube ? String(v.youtube) : "");
+const capaDrive = (id, w) => "https://drive.google.com/thumbnail?id=" + encodeURIComponent(id) + "&sz=w" + w;
+const capaVideo = v => yt(v) ? "https://i.ytimg.com/vi/" + encodeURIComponent(yt(v)) + "/hqdefault.jpg"
+                     : v && v.drive ? capaDrive(v.drive, 900) : (v && v.capa) || "";
+function caixaVideo(caixa, v, rotulo) {                         // vídeo do próprio site (mp4) ou do YouTube (não listado)
+  if (yt(v) || v.drive) {
+    const img = new Image(); img.alt = ""; img.loading = "lazy"; img.referrerPolicy = "no-referrer"; img.src = capaVideo(v); img.onerror = () => img.remove();
+    const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-label", "Assistir " + rotulo);
+    b.innerHTML = '<span class="play"></span>';
+    b.onclick = () => tocar(caixa, v.drive ? "https://drive.google.com/file/d/" + encodeURIComponent(v.drive) + "/preview"
+                                           : "https://www.youtube-nocookie.com/embed/" + encodeURIComponent(yt(v)) + "?autoplay=1&rel=0&playsinline=1");
+    caixa.append(img, b);
+  } else {
+    const el = document.createElement("video"); el.src = v.src + "#t=0.1"; el.controls = true; el.preload = "metadata"; el.playsInline = true;
+    el.setAttribute("aria-label", rotulo); if (v.capa) el.poster = v.capa;
+    el.addEventListener("play", () => { if (tocando && tocando !== caixa) pararVideo(); tocando = caixa; });
+    caixa.appendChild(el);
+  }
+}
 const ACERVO = { fotos: [], videos: [], recados: [] };
 const CARTOES = {};
 for (const [chave, nome, unidade] of [["fotos", "Fotos", ["foto", "fotos"]], ["videos", "Vídeos", ["vídeo", "vídeos"]], ["recados", "Recados", ["recado", "recados"]]]) {
@@ -318,8 +343,12 @@ function montar(chave) {
   itens.forEach((m, i) => {
     let s;
     if (chave === "recados") {
-      s = document.createElement("article"); s.className = "slide texto";
-      const p = document.createElement("p"); p.textContent = m.texto; s.appendChild(p);
+      s = document.createElement("article"); s.className = "slide texto" + (m.video ? " com-video" : "");
+      if (m.video) {                                               // recado em vídeo: toca ali mesmo
+        const v = document.createElement("div"); v.className = "rec-video";
+        caixaVideo(v, m.video, "recado em vídeo " + (i + 1)); s.appendChild(v);
+      }
+      if (m.texto) { const p = document.createElement("p"); p.textContent = m.texto; s.appendChild(p); }
       if (m.nome) { const a = document.createElement("small"); a.textContent = "— " + m.nome; s.appendChild(a); }
       trilho.appendChild(s);
       const t = document.createElement("button"); t.type = "button"; t.className = "num-rec"; t.textContent = i + 1;
@@ -328,56 +357,64 @@ function montar(chave) {
     }
     if (video) {
       s = document.createElement("div"); s.className = "slide video";
-      const img = new Image(); img.alt = ""; img.loading = "lazy"; img.referrerPolicy = "no-referrer"; img.src = miniatura(m.id, 1000);
-      img.onerror = () => img.remove();
-      const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-label", "Assistir vídeo " + (i + 1));
-      b.innerHTML = '<span class="play"></span>'; b.onclick = () => tocar(s, m.id);
-      s.append(img, b);
+      caixaVideo(s, m, "vídeo " + (i + 1));
     } else {
       s = document.createElement("button"); s.type = "button"; s.className = "slide"; s.setAttribute("aria-label", "Ampliar foto " + (i + 1));
       const img = new Image(); img.alt = "Foto " + (i + 1) + " da turma"; img.loading = "lazy"; img.referrerPolicy = "no-referrer";
-      img.src = miniatura(m.id, 1200); s.appendChild(img); s.onclick = () => abrirZoom(i);
+      img.referrerPolicy = "no-referrer"; img.src = m.src; s.appendChild(img); s.onclick = () => abrirZoom(i);
     }
     trilho.appendChild(s);
     const t = document.createElement("button"); t.type = "button"; t.setAttribute("aria-label", "Ir para " + (video ? "vídeo " : "foto ") + (i + 1));
-    const ti = new Image(); ti.alt = ""; ti.loading = "lazy"; ti.referrerPolicy = "no-referrer"; ti.src = miniatura(m.id, 160); t.appendChild(ti);
+    const capa = video ? capaVideo(m) : (m.mini || m.src);
+    if (capa) { const ti = new Image(); ti.alt = ""; ti.loading = "lazy"; ti.referrerPolicy = "no-referrer"; ti.src = capa; t.appendChild(ti); }
+    else { t.className = "num-rec"; t.textContent = "▶ " + (i + 1); }
     t.onclick = () => irPara(i); minis.appendChild(t);
   });
-  trilho.scrollTo({ left: 0, behavior: "instant" }); marcar(0);
+  trilho.style.height = ""; trilho.scrollTo({ left: 0, behavior: "instant" }); marcar(0); ajustarAltura();
 }
 function largura() { const s = trilho.firstElementChild; return s ? s.getBoundingClientRect().width + 10 : 1; }
 function irPara(i) {
   const n = trilho.children.length; if (!n) return;
   idx = (i + n) % n; trilho.scrollTo({ left: idx * largura(), behavior: "smooth" }); marcar(idx);
+  clearTimeout(irPara.t); irPara.t = setTimeout(ajustarAltura, 450);           // garante a altura certa mesmo sem evento de rolagem
 }
 function marcar(i) {
   idx = i; const n = trilho.children.length;
   pConta.textContent = n ? (i + 1) + " / " + n : "";
   [...minis.children].forEach((b, k) => b.classList.toggle("atual", k === i));
-  minis.children[i]?.scrollIntoView({ block: "nearest", inline: "nearest" });
-  const s = trilho.children[i];                                   // recados: a caixa acompanha a altura do recado da vez
-  trilho.style.height = aberto === "recados" && s ? s.offsetHeight + "px" : "";
-  if (tocando && tocando !== trilho.children[i]) pararVideo();
+  const mb = minis.children[i];                                    // rola só a faixa de miniaturas (scrollIntoView travava o carrossel)
+  if (mb) minis.scrollLeft = mb.offsetLeft - minis.offsetLeft - (minis.clientWidth - mb.offsetWidth) / 2;   // sem animação: duas rolagens suaves ao mesmo tempo se cancelam
+  if (tocando && !trilho.children[i]?.contains(tocando)) pararVideo();
 }
 let rolar = null;
-trilho.addEventListener("scroll", () => { clearTimeout(rolar); rolar = setTimeout(() => marcar(Math.round(trilho.scrollLeft / largura())), 80); });
+function ajustarAltura() {                                      // recados: a caixa acompanha a altura do recado da vez
+  const s = trilho.children[idx];
+  trilho.style.height = aberto === "recados" && s ? s.offsetHeight + "px" : "";
+}
+trilho.addEventListener("scroll", () => {
+  clearTimeout(rolar);
+  rolar = setTimeout(() => { marcar(Math.round(trilho.scrollLeft / largura())); ajustarAltura(); }, 120);   // só depois que parar de rolar
+});
 trilho.addEventListener("keydown", e => { if (e.key === "ArrowLeft") irPara(idx - 1); if (e.key === "ArrowRight") irPara(idx + 1); });
 document.getElementById("p-ant").onclick = () => irPara(idx - 1);
 document.getElementById("p-prox").onclick = () => irPara(idx + 1);
 document.getElementById("p-fechar").onclick = fechar;
-function tocar(slide, id) {
+function tocar(slide, url) {
   pararVideo();
-  const f = document.createElement("iframe"); f.src = player(id); f.title = "Vídeo da turma";
+  const f = document.createElement("iframe"); f.src = url; f.title = "Vídeo da turma";
   f.allow = "autoplay; fullscreen"; f.allowFullscreen = true; slide.appendChild(f); tocando = slide;
 }
-function pararVideo() { if (tocando) { tocando.querySelector("iframe")?.remove(); tocando = null; } }
+function pararVideo() {
+  if (!tocando) return;
+  tocando.querySelector("iframe")?.remove(); tocando.querySelectorAll("video").forEach(v => v.pause()); tocando = null;
+}
 
 /* foto em tela cheia */
 const zoom = document.getElementById("zoom"), zImg = document.getElementById("z-img"), zConta = document.getElementById("z-conta");
 let zi = 0;
 function abrirZoom(i) {
   const f = ACERVO.fotos; zi = (i + f.length) % f.length;
-  zImg.src = miniatura(f[zi].id, 1600); zImg.alt = "Foto " + (zi + 1) + " da turma";
+  zImg.referrerPolicy = "no-referrer"; zImg.src = f[zi].src; zImg.alt = "Foto " + (zi + 1) + " da turma";
   zConta.textContent = (zi + 1) + " / " + f.length;
   if (!zoom.open) zoom.showModal();
 }
@@ -394,16 +431,63 @@ zoom.addEventListener("touchend", e => {
   if (Math.abs(dx) > 50) abrirZoom(zi + (dx < 0 ? 1 : -1));
 });
 
-if (FOTOS_API.trim()) fetch(FOTOS_API.trim())
-  .then(r => r.json())
+/* leitura da pasta pública do Drive: fotos/, videos/ e recados/ (planilha + vídeos com o nome de quem mandou) */
+const semAcento = s => String(s).normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().trim();
+async function driveListar(id) {
+  let arquivos = [], pagina = "";
+  do {
+    const q = new URLSearchParams({ q: "'" + id + "' in parents and trashed = false", orderBy: "name", pageSize: "1000",
+      fields: "nextPageToken,files(id,name,mimeType)", key: DRIVE_CHAVE });
+    if (pagina) q.set("pageToken", pagina);
+    const r = await fetch("https://www.googleapis.com/drive/v3/files?" + q);
+    if (!r.ok) throw new Error("Drive respondeu " + r.status);
+    const d = await r.json(); arquivos = arquivos.concat(d.files || []); pagina = d.nextPageToken || "";
+  } while (pagina);
+  return arquivos;
+}
+function lerCSV(txt) {                                              // CSV simples, com aspas e quebras de linha dentro do recado
+  const linhas = []; let linha = [], campo = "", aspas = false;
+  for (let i = 0; i < txt.length; i++) {
+    const c = txt[i];
+    if (aspas) { if (c === '"') { if (txt[i + 1] === '"') { campo += '"'; i++; } else aspas = false; } else campo += c; }
+    else if (c === '"') aspas = true;
+    else if (c === ",") { linha.push(campo); campo = ""; }
+    else if (c === "\n") { linha.push(campo); linhas.push(linha); linha = []; campo = ""; }
+    else if (c !== "\r") campo += c;
+  }
+  if (campo || linha.length) { linha.push(campo); linhas.push(linha); }
+  return linhas;
+}
+async function carregarDoDrive() {
+  const raiz = await driveListar(DRIVE_PASTA);
+  const sub = nome => raiz.find(f => f.mimeType === "application/vnd.google-apps.folder" && semAcento(f.name) === nome);
+  const [lf, lv, lr] = await Promise.all(["fotos", "videos", "recados"].map(n => sub(n) ? driveListar(sub(n).id) : []));
+  const fotos = lf.filter(f => f.mimeType.startsWith("image/")).map(f => ({ src: capaDrive(f.id, 1600), mini: capaDrive(f.id, 300) }));
+  const videos = lv.filter(f => f.mimeType.startsWith("video/")).map(f => ({ drive: f.id }));
+  const recados = [];
+  for (const planilha of lr.filter(f => f.mimeType === "application/vnd.google-apps.spreadsheet")) {
+    const r = await fetch("https://www.googleapis.com/drive/v3/files/" + encodeURIComponent(planilha.id) + "/export?" +
+                          new URLSearchParams({ mimeType: "text/csv", key: DRIVE_CHAVE }));
+    if (!r.ok) continue;
+    lerCSV(await r.text()).slice(1).forEach(l => {                  // linha 1 = títulos (Recado | Assinatura)
+      const texto = (l[0] || "").trim();
+      if (texto) recados.push({ texto: texto.slice(0, 1200), nome: (l[1] || "").trim().slice(0, 80) });
+    });
+  }
+  lr.filter(f => f.mimeType.startsWith("video/"))
+    .forEach(f => recados.push({ texto: "", nome: f.name.replace(/\.[^.]+$/, "").slice(0, 80), video: { drive: f.id } }));
+  return { fotos, videos, recados };
+}
+(DRIVE_PASTA.trim() && DRIVE_CHAVE.trim() ? carregarDoDrive()
+  : fetch(GALERIA + "?v=" + Date.now(), { cache: "no-store" }).then(r => r.ok ? r.json() : {}))
   .then(d => {
-    const midias = (d.fotos || []).filter(m => m && m.id);
-    ACERVO.fotos = midias.filter(m => m.tipo !== "video");
-    ACERVO.videos = midias.filter(m => m.tipo === "video");
-    ACERVO.recados = (d.recados || []).filter(r => r && r.texto);
+    const temVideo = v => v && (v.src || v.youtube || v.drive);
+    ACERVO.fotos = (d.fotos || []).filter(f => f && f.src);
+    ACERVO.videos = (d.videos || []).filter(temVideo);
+    ACERVO.recados = (d.recados || []).filter(r => r && (r.texto || temVideo(r.video)));
     atualizarCartoes();
   })
-  .catch(() => {});
+  .catch(e => console.warn("Galeria:", e.message));
 
 const lista = document.getElementById("passageiros");
 NOMES.forEach((n, i) => {
